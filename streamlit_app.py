@@ -1,40 +1,53 @@
-import altair as alt
+# S10.1: Copy this code cell in 'iris_app.py' using the Sublime text editor. You have already created this ML model in the previous class(es).
+
+# Importing the necessary libraries.
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 import streamlit as st
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
 
-"""
-# Welcome to Streamlit!
+# Loading the dataset.
+iris_df = pd.read_csv("iris-species.csv")
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:.
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+# Adding a column in the Iris DataFrame to resemble the non-numeric 'Species' column as numeric using the 'map()' function.
+# Creating the numeric target column 'Label' to 'iris_df' using the 'map()' function.
+iris_df['Label'] = iris_df['Species'].map({'Iris-setosa': 0, 'Iris-virginica': 1, 'Iris-versicolor':2})
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+# Creating a model for Support Vector classification to classify the flower types into labels '0', '1', and '2'.
 
-num_points = st.slider("Number of points in spiral", 1, 10000, 1100)
-num_turns = st.slider("Number of turns in spiral", 1, 300, 31)
+# Creating features and target DataFrames.
+X = iris_df[['SepalLengthCm','SepalWidthCm', 'PetalLengthCm', 'PetalWidthCm']]
+y = iris_df['Label']
 
-indices = np.linspace(0, 1, num_points)
-theta = 2 * np.pi * num_turns * indices
-radius = indices
+# Splitting the data into training and testing sets.
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.33, random_state = 42)
 
-x = radius * np.cos(theta)
-y = radius * np.sin(theta)
+# Creating the SVC model and storing the accuracy score in a variable 'score'.
+svc_model = SVC(kernel = 'linear')
+svc_model.fit(X_train, y_train)
+score = svc_model.score(X_train, y_train)
 
-df = pd.DataFrame({
-    "x": x,
-    "y": y,
-    "idx": indices,
-    "rand": np.random.randn(num_points),
-})
 
-st.altair_chart(alt.Chart(df, height=700, width=700)
-    .mark_point(filled=True)
-    .encode(
-        x=alt.X("x", axis=None),
-        y=alt.Y("y", axis=None),
-        color=alt.Color("idx", legend=None, scale=alt.Scale()),
-        size=alt.Size("rand", legend=None, scale=alt.Scale(range=[1, 150])),
-    ))
+def perdiction(sw,sl,pw,pl):
+    answer=svc_model.predict([[sl,sw,pl,pw]])
+
+    if answer[0]==0:
+            return('Iris-setosa')
+    elif answer[0]==1:
+            return('Iris-virginica')
+    elif answer[0]==2:
+            return('Iris-versicolor')
+
+sepall=st.slider('sepl l',0.0,10.0)
+sepalw=st.slider('sepl w',0.0,10.0)
+petall=st.slider('petal l',0.0,10.0)
+petalw=st.slider('petal w',0.0,10.0)
+a=st.button('click')
+if a == True:
+    st.write('flower is ', perdiction(sepall, sepalw, petall, petalw))
+    st.write('the score is ', score)
+
+
